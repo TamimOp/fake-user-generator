@@ -4,6 +4,7 @@ const App = () => {
   const [region, setRegion] = useState("en");
   const [errorCount, setErrorCount] = useState(0);
   const [seed, setSeed] = useState(Math.random().toString().slice(2, 8));
+  const [customSeed, setCustomSeed] = useState(seed);
   const [records, setRecords] = useState([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
@@ -11,7 +12,7 @@ const App = () => {
   const loadMoreRecords = async () => {
     setLoading(true);
     const response = await fetch(
-      `http://localhost:5000/api/users?region=${region}&count=10&errors=${errorCount}&seed=${seed}&page=${page}`
+      `http://localhost:5000/api/users?region=${region}&count=10&errors=${errorCount}&seed=${customSeed}&page=${page}`
     );
     const data = await response.json();
     setRecords((prevRecords) => [...prevRecords, ...data]);
@@ -22,7 +23,7 @@ const App = () => {
     setPage(1); // Reset page when parameters change
     setRecords([]); // Clear existing records
     loadMoreRecords();
-  }, [region, errorCount, seed]);
+  }, [region, errorCount, customSeed]);
 
   return (
     <div className="container mx-auto p-4">
@@ -38,6 +39,7 @@ const App = () => {
             className="ml-2 p-2 border rounded"
           >
             <option value="en">USA</option>
+            <option value="fr">France</option>
             <option value="pl">Poland</option>
             <option value="ge">Georgia</option>
           </select>
@@ -69,20 +71,21 @@ const App = () => {
           <span className="text-lg">Seed:</span>
           <input
             type="text"
-            value={seed}
-            readOnly
+            value={customSeed}
+            onChange={(e) => setCustomSeed(e.target.value)}
             className="ml-2 p-2 border rounded w-20"
           />
           <button
-            onClick={() => setSeed(Math.random().toString().slice(2, 8))}
+            onClick={() => {
+              const newSeed = Math.random().toString().slice(2, 8);
+              setSeed(newSeed);
+              setCustomSeed(newSeed);
+            }}
             className="ml-2 p-2 bg-blue-500 text-white rounded"
           >
             🔄
           </button>
         </label>
-
-        {/* Export Button */}
-        <button className="p-2 bg-green-500 text-white rounded">Export</button>
       </div>
 
       {/* Table */}

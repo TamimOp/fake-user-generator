@@ -44,10 +44,9 @@ const useUserGenerator = (
       generatedUsers.push({
         id: faker.string.uuid(),
         name: faker.person.fullName(),
-        address: faker.location.streetAddress(),
-        city: faker.location.city(),
-        country,
+        address: `${country}, ${faker.location.city()}, ${faker.location.streetAddress()}`,
         phone: faker.phone.number(),
+        country,
       });
     }
 

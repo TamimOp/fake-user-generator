@@ -61,7 +61,6 @@ const App = () => {
         ...user,
         name: applyErrors(user.name, errorCount),
         address: applyErrors(user.address, errorCount),
-        city: applyErrors(user.city, errorCount),
         country: applyErrors(user.country, errorCount),
         phone: applyErrors(user.phone, errorCount),
       };

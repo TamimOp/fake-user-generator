@@ -8,7 +8,6 @@ export default function Control({
 }) {
   return (
     <div className="flex items-center space-x-4 mb-4 justify-center">
-      {/* Region Selector */}
       <label className="block">
         <span className="text-lg">Region:</span>
         <select
@@ -22,7 +21,6 @@ export default function Control({
         </select>
       </label>
 
-      {/* Error Slider and Input */}
       <label className="block">
         <span className="text-lg">Errors:</span>
         <input
@@ -43,7 +41,6 @@ export default function Control({
         />
       </label>
 
-      {/* Seed Input and Button */}
       <label className="block">
         <span className="text-lg">Seed:</span>
         <input

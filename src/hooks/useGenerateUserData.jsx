@@ -22,20 +22,23 @@ const getRegionInfo = (regionCode) => {
 const useUserGenerator = (
   initialRegion = "en",
   initialSeed = 1234,
-  initialCount = 10
+  initialCount = 20
 ) => {
   const [users, setUsers] = useState([]);
   const [page, setPage] = useState(1);
   const [region, setRegion] = useState(initialRegion);
   const [seed, setSeed] = useState(initialSeed);
   const [count, setCount] = useState(initialCount);
+  const [totalCount, setTotalCount] = useState(0);
 
   const generateUsers = (regionCode, seedValue, countValue, pageValue) => {
     const { country, locale: faker } = getRegionInfo(regionCode);
-
+    const currentSeed = parseInt(seedValue) + (pageValue - 1) * countValue;
     const generatedUsers = [];
+
     for (let i = 0; i < countValue; i++) {
-      const userSeed = parseInt(seedValue) + (pageValue - 1) * countValue + i;
+      const userSeed = currentSeed + i + totalCount;
+      setTotalCount(totalCount + 1);
       faker.seed(userSeed);
 
       generatedUsers.push({
@@ -52,12 +55,13 @@ const useUserGenerator = (
   };
 
   useEffect(() => {
+    setTotalCount(0);
     const newUsers = generateUsers(region, seed, count, 1);
     setUsers(newUsers);
     setPage(2);
   }, [region, seed, count]);
 
-  const loadMoreUsers = () => {
+  const loadMoreUsers = (region = region, count = count) => {
     const newUsers = generateUsers(region, seed, count, page);
     setUsers((prevUsers) => [...prevUsers, ...newUsers]);
     setPage(page + 1);

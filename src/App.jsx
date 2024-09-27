@@ -16,7 +16,6 @@ const App = () => {
   const loadMoreRecords = async () => {
     loadMoreUsers(region, 10);
   };
-  // Linear congruential generator for seeded random numbers
   const seededRandom = (seed) => {
     let value = seed;
     return function () {
@@ -28,21 +27,20 @@ const App = () => {
     };
   };
 
-  // Function to apply random errors to a text, influenced by the seed
   const applyErrors = (text, errorCount) => {
     const types = ["delete", "add", "swap"];
     let result = text.split("");
 
-    const random = seededRandom(seed); // Create a PRNG using the seed
+    const random = seededRandom(seed);
 
     for (let i = 0; i < errorCount; i++) {
-      const errorType = types[Math.floor(random() * types.length)]; // Deterministic random error type
-      const pos = Math.floor(random() * result.length); // Deterministic random position
+      const errorType = types[Math.floor(random() * types.length)];
+      const pos = Math.floor(random() * result.length);
 
       if (errorType === "delete" && result.length > 1) {
         result.splice(pos, 1);
       } else if (errorType === "add") {
-        const randomChar = String.fromCharCode(97 + Math.floor(random() * 26)); // Deterministic random char
+        const randomChar = String.fromCharCode(97 + Math.floor(random() * 26));
         result.splice(pos, 0, randomChar);
       } else if (errorType === "swap" && pos < result.length - 1) {
         [result[pos], result[pos + 1]] = [result[pos + 1], result[pos]];

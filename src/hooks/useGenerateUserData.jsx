@@ -33,13 +33,16 @@ const useUserGenerator = (
 
   const generateUsers = (regionCode, seedValue, countValue, pageValue) => {
     const { country, locale: faker } = getRegionInfo(regionCode);
-    const currentSeed = parseInt(seedValue) + (pageValue - 1) * countValue;
+    const currentSeed =
+      parseInt(seedValue) + pageValue * countValue + totalCount;
     const generatedUsers = [];
+
+    console.log(totalCount);
 
     for (let i = 0; i < countValue; i++) {
       const userSeed = currentSeed + i + totalCount;
-      setTotalCount(totalCount + 1);
       faker.seed(userSeed);
+      setTotalCount(totalCount + 1);
 
       generatedUsers.push({
         id: faker.string.uuid(),
@@ -60,13 +63,14 @@ const useUserGenerator = (
     setPage(2);
   }, [region, seed, count]);
 
-  const loadMoreUsers = (region = region, count = count) => {
-    const newUsers = generateUsers(region, seed, count, page);
+  const loadMoreUsers = (newRegion = region, newCount = count) => {
+    const newUsers = generateUsers(newRegion, seed, newCount, page);
     setUsers((prevUsers) => [...prevUsers, ...newUsers]);
     setPage(page + 1);
   };
 
   const reGenerateUsers = (newRegion, newSeed = seed, newCount = count) => {
+    setTotalCount(0);
     setRegion(newRegion);
     setSeed(newSeed);
     setCount(newCount);

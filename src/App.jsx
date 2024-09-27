@@ -7,7 +7,10 @@ const App = () => {
   const [region, setRegion] = useState("en");
   const [errorCount, setErrorCount] = useState(0);
   const [seed, setSeed] = useState(Math.random().toString().slice(2, 8));
-  const { users, loadMoreUsers } = useGenerateUserData(region, seed);
+  const { users, loadMoreUsers, reGenerateUsers } = useGenerateUserData(
+    region,
+    seed
+  );
   const [records, setRecords] = useState(users);
 
   const loadMoreRecords = async () => {
@@ -48,6 +51,11 @@ const App = () => {
 
     return result.join("");
   };
+
+  useEffect(() => {
+    const newRecords = reGenerateUsers(region, seed);
+    setRecords(newRecords);
+  }, [region, seed]);
 
   useEffect(() => {
     const updatedRecords = users.map((user) => {

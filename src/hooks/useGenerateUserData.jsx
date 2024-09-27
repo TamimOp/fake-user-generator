@@ -1,95 +1,82 @@
-import { faker } from "@faker-js/faker";
-import { useEffect, useRef, useState } from "react";
+import { fakerEN_US, fakerKA_GE, fakerPL } from "@faker-js/faker";
+import { useEffect, useState } from "react";
+
+// Helper function to map region codes to locale and country
+const getRegionInfo = (regionCode) => {
+  const regionMap = {
+    en: {
+      country: "USA",
+      locale: fakerEN_US,
+    },
+    pl: {
+      country: "Poland",
+      locale: fakerPL,
+    },
+    ge: {
+      country: "Georgia",
+      locale: fakerKA_GE,
+    },
+  };
+  return regionMap[regionCode] || regionMap["en"]; // Default to 'en' if region is unknown
+};
 
 const useUserGenerator = (
   initialRegion = "en",
   initialSeed = 1234,
   initialCount = 10
 ) => {
-  const [users, setUsers] = useState([]);
-  const [page, setPage] = useState(1);
-  const isInitialLoad = useRef(true);
+  const [users, setUsers] = useState([]); // State to hold generated users
+  const [page, setPage] = useState(1); // Pagination page tracking
+  const [region, setRegion] = useState(initialRegion); // Current region
+  const [seed, setSeed] = useState(initialSeed); // Current seed
+  const [count, setCount] = useState(initialCount); // Number of users to generate
 
-  // Function to generate users
-  const generateUsers = (region, seed, count, page) => {
+  // Function to generate a batch of users
+  const generateUsers = (regionCode, seedValue, countValue, pageValue) => {
+    const { country, locale: faker } = getRegionInfo(regionCode);
+
     const generatedUsers = [];
+    for (let i = 0; i < countValue; i++) {
+      const userSeed = parseInt(seedValue) + (pageValue - 1) * countValue + i;
+      faker.seed(userSeed); // Seed faker to ensure consistent results
 
-    for (let i = 0; i < count; i++) {
-      const userSeed = parseInt(seed) + (page - 1) * count + i;
-      faker.seed(userSeed);
-
-      let country, city, address;
-
-      switch (region) {
-        case "en":
-          faker.locale = "en_US";
-          country = "USA";
-          city = faker.location.city();
-          address = faker.location.streetAddress();
-          break;
-
-        case "pl":
-          faker.locale = "pl";
-          country = "Poland";
-          city = faker.location.city();
-          address = faker.location.streetAddress();
-          break;
-
-        case "ge":
-          faker.locale = "ka";
-          country = "Georgia";
-          city = faker.location.city();
-          address = faker.location.streetAddress();
-          break;
-
-        default:
-          faker.locale = "en_US";
-          country = "USA";
-          city = faker.location.city();
-          address = faker.location.streetAddress();
-      }
-
-      const user = {
+      generatedUsers.push({
         id: faker.string.uuid(),
         name: faker.person.fullName(),
-        address: address,
-        city: city,
-        country: country,
+        address: faker.location.streetAddress(),
+        city: faker.location.city(),
+        country,
         phone: faker.phone.number(),
-      };
-
-      generatedUsers.push(user);
+      });
     }
 
-    setUsers((prevUsers) => [...prevUsers, ...generatedUsers]);
+    return generatedUsers;
   };
 
-  // Load users based on parameters
+  // Effect to regenerate users when region, seed, or count changes
   useEffect(() => {
-    if (isInitialLoad.current) {
-      isInitialLoad.current = false; // Mark initial load as done
-      generateUsers(initialRegion, initialSeed, initialCount, 1);
-      setPage(2); // Increment page for next load
-    } else {
-      // On parameter change, regenerate users
-      setUsers([]); // Clear users on parameter change
-      setPage(1); // Reset page for new generation
-      generateUsers(initialRegion, initialSeed, initialCount, 1);
-    }
-  }, [initialRegion, initialSeed, initialCount]);
+    // Ensure users are updated when region or seed changes
+    const newUsers = generateUsers(region, seed, count, 1);
+    setUsers(newUsers); // Replace the current users with the new ones
+    setPage(2); // Reset page number for pagination
+  }, [region, seed, count]); // Depend on region, seed, and count
 
-  const loadMoreUsers = (region, seed, count = 10) => {
-    generateUsers(region, seed, count, page);
-    setPage((prevPage) => prevPage + 1); // Increment page for next load
+  // Function to load more users
+  const loadMoreUsers = () => {
+    const newUsers = generateUsers(region, seed, count, page); // Generate users for the next page
+    setUsers((prevUsers) => [...prevUsers, ...newUsers]); // Append new users to the current list
+    setPage(page + 1); // Increment page for next load
   };
 
-  const reGenerateUsers = (region, seed, count = 10) => {
-    setUsers([]); // Clear previous users
-    setPage(1); // Reset page
-    generateUsers(region, seed, count, 1);
+  // Function to handle region change and regenerate users
+  const reGenerateUsers = (newRegion, newSeed = seed, newCount = count) => {
+    setRegion(newRegion); // Update region
+    setSeed(newSeed); // Update seed (or keep current)
+    setCount(newCount); // Update count (or keep current)
+    setPage(1); // Reset page to 1 for regeneration
   };
 
-  return { users, loadMoreUsers, reGenerateUsers, page };
+  return { users, loadMoreUsers, reGenerateUsers };
 };
 
 export default useUserGenerator;

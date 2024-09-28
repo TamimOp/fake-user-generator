@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import Control from "./components/Control";
 import DataTable from "./components/DataTable";
 import useGenerateUserData from "./hooks/useGenerateUserData";
@@ -12,10 +12,12 @@ const App = () => {
     seed
   );
   const [records, setRecords] = useState(users);
+  const loadMoreRef = useRef(null);
 
   const loadMoreRecords = async () => {
     loadMoreUsers(region, 10);
   };
+
   const seededRandom = (seed) => {
     let value = seed;
     return function () {
@@ -69,6 +71,27 @@ const App = () => {
     setRecords(updatedRecords);
   }, [errorCount, users]);
 
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          loadMoreRecords();
+        }
+      },
+      { threshold: 1.0 }
+    );
+
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current);
+    }
+
+    return () => {
+      if (loadMoreRef.current) {
+        observer.unobserve(loadMoreRef.current);
+      }
+    };
+  }, [users]);
+
   return (
     <div className="container mx-auto p-4">
       <h1 className="text-center text-3xl font-bold mb-4">User Registry</h1>
@@ -82,15 +105,7 @@ const App = () => {
       />
       <DataTable records={records} />
 
-      {/* Load More Button */}
-      <button
-        onClick={() => {
-          loadMoreRecords();
-        }}
-        className="mt-4 p-2 bg-blue-500 text-white rounded"
-      >
-        Load More
-      </button>
+      <div ref={loadMoreRef} className="h-10"></div>
     </div>
   );
 };
